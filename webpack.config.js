@@ -1,33 +1,51 @@
 // entry -> output
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
 
 const publicPath = path.join(__dirname, 'public');
+module.exports = (env) => {
+    const isProduction = env === 'production';
+    const CSSExtract = new MiniCssExtractPlugin({ filename: 'styles.css' });
 
-// use webpack docs for more options
-module.exports = {
-    entry: './src/app.js',
-    output: {
-        path: publicPath,
-        filename: 'bundle.js'
-    },
-    module: {
-        rules: [{
-            loader: 'babel-loader',
-            test: /\.js$/,
-            exclude: /node_modules/
-        }, {
-            test: /\.s?css$/,
-            use: [
-                'style-loader',
-                'css-loader',
-                'sass-loader'
-            ]
-        }]
-    },
-    devtool: 'cheap-module-eval-source-map',
-    devServer: {
-        contentBase: publicPath,
-        historyApiFallback: true
+    return {
+        entry: './src/app.js',
+        output: {
+            path: publicPath,
+            filename: 'bundle.js'
+        },
+        module: {
+            rules: [{
+                loader: 'babel-loader',
+                test: /\.js$/,
+                exclude: /node_modules/
+            }, {
+                test: /\.s?css$/,
+                use: [{
+                    loader: MiniCssExtractPlugin.loader
+                }, {
+                    loader: 'css-loader',
+                    options: {
+                        sourceMap: true
+                    }
+                }, {
+                    loader: 'sass-loader',
+                    options: {
+                        sourceMap: true
+                    }
+                }
+                ]
+            }]
+        },
+        plugins: [
+            CSSExtract
+        ],
+        devtool: isProduction ? 'source-map' : 'inline-source-map',
+        devServer: {
+            contentBase: publicPath,
+            historyApiFallback: true
+        }
     }
 };
+
 
